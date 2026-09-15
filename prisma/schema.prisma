@@ -1,0 +1,379 @@
+// Somtel Somalia — local SQLite database (replaces the old Strapi CMS).
+// Run `npm run db:push` after editing, then `npm run db:seed`.
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+// ---------- Blog (replaces Strapi `blogs`) ----------
+
+model Post {
+  id         Int        @id @default(autoincrement())
+  slug       String     @unique
+  title      String
+  excerpt    String?
+  body       String // markdown
+  imageUrl   String?
+  author     String     @default("Somtel")
+  postedDate DateTime   @default(now())
+  published  Boolean    @default(true)
+  categories Category[]
+  comments   Comment[]
+  createdAt  DateTime   @default(now())
+  updatedAt  DateTime   @updatedAt
+
+  // Somali translations. Null falls back to the English column above.
+  titleSo   String?
+  excerptSo String?
+  bodySo    String?
+}
+
+model Category {
+  id    Int    @id @default(autoincrement())
+  name  String @unique
+  slug  String @unique
+  posts Post[]
+}
+
+// A reader's comment on a post, or a reply to another comment.
+//
+// Replies point at their parent rather than living in a separate table, so a
+// thread is one query and a deleted comment takes its replies with it. The site
+// renders two levels: a comment, and the replies under it. A reply to a reply is
+// stored against the same top-level parent, which keeps the thread readable
+// instead of letting it march off the right-hand edge.
+model Comment {
+  id       Int       @id @default(autoincrement())
+  post     Post      @relation(fields: [postId], references: [id], onDelete: Cascade)
+  postId   Int
+  parent   Comment?  @relation("CommentReplies", fields: [parentId], references: [id], onDelete: Cascade)
+  parentId Int?
+  replies  Comment[] @relation("CommentReplies")
+
+  name  String
+  email String? // never shown publicly — only so we can reply by email
+  body  String
+
+  // Somtel's own replies, posted from the dashboard, carry a badge.
+  isStaff Boolean @default(false)
+
+  // New comments appear straight away. Moderation is after the fact: the
+  // dashboard can hide one, which leaves the thread intact, or delete it.
+  approved  Boolean  @default(true)
+  createdAt DateTime @default(now())
+
+  @@index([postId, parentId])
+}
+
+// ---------- Careers (replaces Strapi `careers`) ----------
+
+model Job {
+  id           Int              @id @default(autoincrement())
+  slug         String           @unique
+  title        String
+  type         String? // Full-time / Contract
+  location     String?
+  department   String?
+  detail       String // markdown
+  deadline     DateTime?
+  status       String           @default("Opened")
+  createdAt    DateTime         @default(now())
+  updatedAt    DateTime         @updatedAt
+  applications JobApplication[]
+
+  // Somali translations. Null falls back to the English column above.
+  titleSo  String?
+  detailSo String?
+}
+
+model JobApplication {
+  id        Int      @id @default(autoincrement())
+  jobId     Int
+  job       Job      @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  name      String
+  email     String
+  phone     String?
+  message   String?
+  createdAt DateTime @default(now())
+}
+
+// ---------- Products (content that used to be hardcoded in JSX) ----------
+
+model Product {
+  id        Int     @id @default(autoincrement())
+  slug      String  @unique
+  name      String
+  category  String // "personal" | "business"
+  tagline   String?
+  heroTitle String?
+  heroText  String?
+  heroImage String?
+  body      String? // markdown
+  order     Int     @default(0)
+  plans     Plan[]
+  faqs      Faq[]
+
+  // Somali translations. Null falls back to the English column above.
+  nameSo      String?
+  taglineSo   String?
+  heroTitleSo String?
+  heroTextSo  String?
+  bodySo      String?
+}
+
+model Plan {
+  id        Int     @id @default(autoincrement())
+  productId Int
+  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  title     String
+  price     Float
+  unit      String?
+  features  String // JSON array of strings (SQLite has no array type)
+  highlight Boolean @default(false)
+  order     Int     @default(0)
+
+  // Somali translations. Null falls back to the English column above.
+  titleSo    String?
+  featuresSo String?
+}
+
+model Faq {
+  id        Int      @id @default(autoincrement())
+  productId Int?
+  product   Product? @relation(fields: [productId], references: [id], onDelete: Cascade)
+  question  String
+  answer    String
+  // Groups the site-wide FAQs on the Help Center. Null for product FAQs.
+  topic     String?
+  order     Int      @default(0)
+
+  // Somali translations. Null falls back to the English column above.
+  questionSo String?
+  answerSo   String?
+}
+
+// ---------- Home page content ----------
+
+model Slide {
+  id       Int     @id @default(autoincrement())
+  title    String
+  subtitle String?
+  text     String?
+  imageUrl String?
+  ctaLabel String?
+  ctaHref  String?
+  order    Int     @default(0)
+  active   Boolean @default(true)
+
+  // Somali translations. Null falls back to the English column above.
+  titleSo    String?
+  subtitleSo String?
+  textSo     String?
+  ctaLabelSo String?
+}
+
+model Testimonial {
+  id       Int     @id @default(autoincrement())
+  name     String
+  position String?
+  quote    String
+  imageUrl String?
+  order    Int     @default(0)
+
+  // Somali translations. Null falls back to the English column above.
+  quoteSo    String?
+  positionSo String?
+}
+
+model Partner {
+  id      Int     @id @default(autoincrement())
+  name    String
+  logoUrl String
+  href    String?
+  order   Int     @default(0)
+}
+
+// ---------- Forms ----------
+
+model ContactMessage {
+  id        Int      @id @default(autoincrement())
+  name      String
+  email     String
+  message   String
+  createdAt DateTime @default(now())
+  handled   Boolean  @default(false)
+}
+
+model Subscriber {
+  id        Int      @id @default(autoincrement())
+  email     String   @unique
+  createdAt DateTime @default(now())
+}
+
+// ---------- Generic markdown pages (privacy, terms, and anything similar) ----------
+
+model Page {
+  id          Int      @id @default(autoincrement())
+  slug        String   @unique
+  title       String
+  description String?
+  body        String // markdown
+  updatedAt   DateTime @updatedAt
+
+  // Somali translations. Null falls back to the English column above.
+  titleSo       String?
+  descriptionSo String?
+  bodySo        String?
+}
+
+// ---------- Network coverage (one row per city we serve) ----------
+
+model CoverageArea {
+  id       Int     @id @default(autoincrement())
+  region   String
+  city     String
+  services String // JSON array of strings, same convention as Plan.features
+  note     String?
+  order    Int     @default(0)
+
+  // Somali translations. Null falls back to the English column above.
+  noteSo String?
+}
+
+// ---------- Site-wide settings (phone, email, socials...) ----------
+
+model Setting {
+  key   String @id
+  value String
+}
+
+// ---------- Reusable content tiles ----------
+// Small "icon + title + text" blocks that several pages render as outline cards
+// (career benefits, the hiring steps, the contact channels). Keeping them here
+// means the copy is editable in Prisma Studio instead of buried in a component.
+
+model Feature {
+  id    Int     @id @default(autoincrement())
+  group String // "career-benefits" | "career-process" | "contact-channels"
+  icon  String? // a lucide-react icon name, resolved by src/lib/icons.ts
+  title String
+  text  String
+  order Int     @default(0)
+
+  // Somali translations. Null falls back to the English column above.
+  titleSo String?
+  textSo  String?
+}
+
+// ---------- Page sections ----------
+// A page is an ordered list of section blocks instead of one long markdown body.
+// `type` decides which component renders the row; `items` carries the repeating
+// content (cards, stats, steps, FAQ rows) as a JSON array, the same convention
+// Plan.features and CoverageArea.services already use.
+
+model PageSection {
+  id        Int     @id @default(autoincrement())
+  // Which page this belongs to: a Product.slug, or a route key such as "home".
+  pageKey   String
+  type      String // hero | image-text | feature-grid | stats | steps | faq | cta | richtext
+  order     Int     @default(0)
+  eyebrow   String?
+  title     String?
+  // Lead paragraph, or the full markdown body for a "richtext" section.
+  body      String?
+  image     String?
+  icon      String? // a lucide-react icon name, resolved by src/lib/icons.ts
+  tone      String? // default | muted | brand — matches the Section component
+  // image-text only: put the image on the right instead of the left.
+  flip      Boolean @default(false)
+  ctaLabel  String?
+  ctaHref   String?
+  ctaLabel2 String?
+  ctaHref2  String?
+  // JSON array of SectionItem — see src/lib/sections.ts.
+  items     String?
+  // A video for the "video" section: either a file path under /public, or
+  // "yt:<id>" for a YouTube video. Nothing is downloaded until the visitor
+  // presses play — see VideoBlock in components/sections/blocks.
+  video     String?
+
+  // Somali translations. Null falls back to the English column above.
+  eyebrowSo   String?
+  titleSo     String?
+  bodySo      String?
+  ctaLabelSo  String?
+  ctaLabel2So String?
+  itemsSo     String?
+
+  @@index([pageKey, order])
+}
+
+// ---------- Retail network ----------
+// Somtel shops and registered agents, shown by the store locator.
+
+model Store {
+  id        Int     @id @default(autoincrement())
+  name      String
+  nameSo    String?
+  city      String
+  region    String
+  address   String
+  addressSo String?
+  hours     String
+  hoursSo   String?
+  phone     String?
+  // "shop" for a Somtel branch, "agent" for a registered eDahab agent.
+  kind      String  @default("shop")
+  // TODO: add real latitude/longitude once the retail team supplies them,
+  // then the map placeholder can become a real map.
+  lat       Float?
+  lng       Float?
+  order     Int     @default(0)
+}
+
+// ---------- Promotions ----------
+// Two kinds of announcement, both editable in Prisma Studio:
+//
+//   banner — a slim strip above the navbar, counting down to `endsAt` so the
+//            reader can see how long an offer has left.
+//   popup  — a card shown once per visitor shortly after arrival, carrying an
+//            event, a video or a picture.
+//
+// A promo only shows between `startsAt` and `endsAt`, so an expired one
+// disappears on its own rather than needing someone to remember to remove it.
+
+model Promo {
+  id         Int       @id @default(autoincrement())
+  kind       String // "banner" | "popup"
+  title      String
+  titleSo    String?
+  text       String?
+  textSo     String?
+  ctaLabel   String?
+  ctaLabelSo String?
+  ctaHref    String?
+  // A drawing ("illus:name"), a video ("yt:id" / "fb:url" / a file), or an image.
+  media      String?
+  startsAt   DateTime?
+  endsAt     DateTime?
+  active     Boolean   @default(true)
+  order      Int       @default(0)
+}
+
+// ---------- Admin ----------
+// Whoever can sign in to the dashboard and edit the site's content.
+// Passwords are stored as a scrypt hash plus its salt, never in the clear.
+
+model AdminUser {
+  id           Int       @id @default(autoincrement())
+  email        String    @unique
+  name         String
+  passwordHash String
+  createdAt    DateTime  @default(now())
+  lastLoginAt  DateTime?
+}

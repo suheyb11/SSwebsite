@@ -38,3 +38,16 @@ next-env.d.ts
 # local env files
 .env
 .env*.local
+
+# prisma
+/prisma/dev.db
+/prisma/dev.db-journal
+
+# Temporary copy of the old Pages Router during the App Router migration.
+# The originals stay in git history; this folder is reference only.
+/legacy/
+
+# Local backups that live in the working folder but do not belong in the repo.
+# ".git - Copy" is a 112MB copy of the object store.
+/.git - Copy/
+/package - Copy.json

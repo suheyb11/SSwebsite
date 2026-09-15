@@ -1,0 +1,217 @@
+    {
+      slug: "home-internet",
+      name: "Home Internet",
+      category: "personal",
+      tagline: "Unlimited fibre for the whole house",
+      heroTitle: "Somtel Fiber Home",
+      heroText:
+        "Fibre straight to your door, with enough speed for everyone in the house to stream, study and work at the same time.",
+      heroImage: "/assets/images/slider/int.jpg",
+      body:
+        "## Fibre built for family life\n\nSomtel Fiber Home brings a dedicated fibre line into your house, not a shared connection borrowed from a mobile mast. That means the same speed at eight in the evening as at eight in the morning, however many people are online.\n\n## What is included\n\n- **Fibre installation** by a Somtel technician, arranged around your schedule\n- **A WiFi router** covering a typical home, with extenders available for larger houses\n- **Unlimited data** with no daily cap and no fair-use throttling on the higher plans\n- **Free relocation** if you move to another covered address\n- **24/7 support** with a fault line that answers day and night\n\n## Choosing your speed\n\n- **Essential** suits a couple of people browsing, messaging and streaming in standard definition.\n- **Family** is the plan most households pick - several phones, a laptop or two, and HD streaming without buffering.\n- **Max** is for large homes, home offices and anyone who works with big files or joins video calls all day.\n\nAll three plans use the same fibre line, so you can move up or down a tier with a phone call rather than a new installation.\n\n## Getting connected\n\nCheck our coverage page to confirm fibre has reached your street, then request an installation online or at any Somtel outlet. Most connections are live within a few working days of survey.\n\n## Business premises\n\nIf you need a guaranteed symmetric line, a static IP or a service-level agreement, our Fiber Optic business service is the right product instead.\n\n## TODO: confirm final residential speeds and monthly prices with the commercial team.",
+      order: 16,
+      plans: [
+        {
+          title: "Fiber Home Essential",
+          price: 30,
+          unit: "month",
+          features: f(
+            "Comfortable for browsing and standard streaming",
+            "Unlimited monthly data",
+            "WiFi router included",
+            "Free standard installation"
+          ),
+        },
+        {
+          title: "Fiber Home Family",
+          price: 55,
+          unit: "month",
+          features: f(
+            "Built for several people online at once",
+            "Unlimited monthly data",
+            "HD streaming and video calls",
+            "WiFi router included"
+          ),
+          highlight: true,
+        },
+        {
+          title: "Fiber Home Max",
+          price: 90,
+          unit: "month",
+          features: f(
+            "Best for large homes and home offices",
+            "Unlimited monthly data",
+            "Priority fault response",
+            "WiFi router and one extender included"
+          ),
+        },
+      ],
+      faqs: [
+        {
+          question: "How do I know if fibre is available at my address?",
+          answer:
+            "Check the coverage page for your city, or call customer care with your address and we will confirm whether your street is on the fibre footprint and when it is due if not.",
+        },
+        {
+          question: "How long does installation take?",
+          answer:
+            "Once your address is surveyed, most homes are connected within a few working days. The technician runs the fibre, mounts the terminal and sets up your WiFi in a single visit.",
+        },
+        {
+          question: "Is there a data cap?",
+          answer:
+            "No. All Fiber Home plans include unlimited monthly data. The difference between plans is the speed of the line, not the amount you can use.",
+        },
+        {
+          question: "Can I change plan later?",
+          answer:
+            "Yes. You can move to a faster or slower plan at any time with a call to customer care. No new installation or equipment is required.",
+        },
+        {
+          question: "What happens if my connection goes down?",
+          answer:
+            "Call the 24/7 fault line. Most issues are resolved remotely, and if a technician is needed we will book a visit at the earliest slot available.",
+        },
+      ],
+    },
+    {
+      slug: "bundles",
+      name: "Bundles",
+      category: "personal",
+      tagline: "Data, minutes and SMS in one package",
+      heroTitle: "Somtel Bundles",
+      heroText:
+        "Pick a bundle that matches how you actually use your phone, and stop paying standard rates for everything.",
+      heroImage: "/assets/images/slider/data.jpg",
+      body:
+        "## Pay for what you use, not for everything\n\nA bundle packages data, minutes and SMS together at a lower rate than paying as you go. Activate one from your handset in a few seconds, and it runs until you use it up or its validity ends.\n\n## The bundle families\n\n- **Daily bundles** for a busy day - cheap, small, and gone by midnight\n- **Weekly bundles** for people who top up little and often\n- **Monthly bundles** for the best value per gigabyte, with a full month of validity\n- **Night bundles** for large downloads and updates during off-peak hours\n- **Social bundles** for messaging and social apps only, at the lowest price\n\n## How to activate\n\nDial the Somtel self-service menu from your handset, pick a bundle, and confirm. The bundle activates immediately and an SMS confirms your balance and expiry date. You can also buy bundles through eDahab or the DahabPlus app, and send one to another Somtel number as a gift.\n\n## Checking your balance\n\nThe self-service menu shows your remaining data, minutes and SMS along with the expiry date for each. We also send an alert when a bundle is nearly used up so nothing runs out unexpectedly.\n\n## Tips for getting more from a bundle\n\n- Buy monthly rather than weekly if your usage is steady - the price per gigabyte drops sharply\n- Use a night bundle for app updates and large downloads\n- Turn on WiFi at home so your mobile bundle is there when you are out\n- Stack a social bundle underneath a data bundle if messaging is most of what you do\n\n## TODO: replace the plan prices below with the current published bundle tariff.",
+      order: 17,
+      plans: [
+        {
+          title: "Daily Bundle",
+          price: 1,
+          unit: "day",
+          features: f(
+            "Data, minutes and SMS for 24 hours",
+            "Activate instantly from your handset",
+            "Ideal for occasional heavy days",
+            "Renew as often as you like"
+          ),
+        },
+        {
+          title: "Weekly Bundle",
+          price: 5,
+          unit: "week",
+          features: f(
+            "Seven days of data, minutes and SMS",
+            "Better value than daily top-ups",
+            "Balance alerts before expiry",
+            "Gift it to another Somtel number"
+          ),
+        },
+        {
+          title: "Monthly Bundle",
+          price: 15,
+          unit: "month",
+          features: f(
+            "Best value per gigabyte",
+            "Full month of validity",
+            "Generous national minutes and SMS",
+            "Auto-renew available"
+          ),
+          highlight: true,
+        },
+      ],
+      faqs: [
+        {
+          question: "How do I activate a bundle?",
+          answer:
+            "Dial the Somtel self-service menu from your handset, choose the bundle you want and confirm. It activates immediately and you receive an SMS with your balance and expiry date.",
+        },
+        {
+          question: "What happens to data I have not used when a bundle expires?",
+          answer:
+            "Unused allowance ends with the bundle validity. If you regularly finish the month with data left over, a smaller bundle will save you money.",
+        },
+        {
+          question: "Can I have more than one bundle at a time?",
+          answer:
+            "Yes. Bundles stack, and the network uses the one that matches your activity first - a social bundle for messaging apps, for example, before a general data bundle.",
+        },
+        {
+          question: "Can I buy a bundle for someone else?",
+          answer:
+            "Yes. From the self-service menu or eDahab you can send a bundle to any other Somtel number as a gift.",
+        },
+      ],
+    },
+    {
+      slug: "devices",
+      name: "Devices",
+      category: "personal",
+      tagline: "Phones, routers and accessories",
+      heroTitle: "The Somtel Store",
+      heroText:
+        "Smartphones, Mifi routers, home WiFi equipment and accessories, available at every Somtel outlet.",
+      heroImage: "/assets/images/slider/sim.jpg",
+      body:
+        "## Everything you need to get online\n\nSomtel outlets stock the hardware that goes with the network - handsets ready for a Somtel SIM, portable Mifi routers, home WiFi equipment, and the accessories that keep them running.\n\n## What we stock\n\n- **Smartphones** across entry, mid and flagship ranges, all network-ready\n- **Feature phones** for long battery life and simple, durable use\n- **Mifi routers** for portable internet shared between up to ten devices\n- **Home WiFi routers and extenders** for Fiber Home customers\n- **Accessories** including chargers, power banks, cables, cases and memory cards\n\n## Buying at an outlet\n\nEvery device sold at a Somtel outlet is set up before you leave. Our staff insert and register your SIM, configure mobile data, transfer your contacts if you are moving from an older handset, and show you how to check your balance and activate bundles.\n\n## Bundled with a plan\n\nMany devices can be taken together with a plan - a Mifi router with a monthly data bundle, or a home router with a Fiber Home installation. Ask at the counter which combinations are running, as offers change through the year.\n\n## Warranty and support\n\nDevices carry the manufacturer warranty. Bring the device and your receipt to any outlet and our team will handle the claim on your behalf. Software setup help is free for the life of the device.\n\n## Find a store\n\nSomtel outlets operate in every city on our network. See the coverage page for the regions we serve, or contact customer care for the branch nearest you.\n\n## TODO: add the live device catalogue, current stock and pricing once the retail team supplies it.",
+      order: 18,
+      faqs: [
+        {
+          question: "Do devices come ready to use?",
+          answer:
+            "Yes. Our staff register your SIM, configure mobile data, and transfer contacts from an older handset before you leave the outlet.",
+        },
+        {
+          question: "Can I pay with eDahab?",
+          answer:
+            "Yes. Every Somtel outlet accepts eDahab, along with cash and card payments.",
+        },
+        {
+          question: "Is there a warranty on devices?",
+          answer:
+            "All devices carry the manufacturer warranty. Bring the device and your receipt to any outlet and our team will process the claim for you.",
+        },
+        {
+          question: "Do you sell routers for Fiber Home?",
+          answer:
+            "Yes. A WiFi router is included with every Fiber Home installation, and extenders are available separately for larger houses.",
+        },
+      ],
+    },
+    {
+      slug: "business",
+      name: "Business",
+      category: "business",
+      tagline: "Connectivity built for organisations",
+      heroTitle: "Somtel for Business",
+      heroText:
+        "Dedicated bandwidth, bulk messaging, call centre tools and managed accounts for organisations of every size.",
+      heroImage: "/assets/images/empowering.jpg",
+      body:
+        "## One provider for the whole organisation\n\nSomtel Business brings connectivity, communication and payments under a single account with a single point of contact. Whether you run a five-person office or a national operation, the same team looks after your services end to end.\n\n## Connectivity\n\n- **Fiber Optic** - dedicated symmetric bandwidth with a service-level agreement, static IP addresses and priority fault response\n- **Point-to-point links** connecting your branches over our own backbone\n- **W-ADSL** where fibre has not yet reached, so no site is left offline\n- **Backup connectivity** on mobile broadband, so an outage never stops trading\n\n## Communication\n\n- **Mysms** for bulk campaigns, alerts and one-time passwords\n- **SMS API** so your own systems send messages automatically\n- **IVR and call centre** with a short code, menu routing and agent reporting\n- **Corporate postpaid** grouping every staff line onto one monthly invoice\n\n## Payments\n\n- **eDahab for business** to collect payments from customers and pay salaries directly to staff handsets\n- **Merchant accounts** with settlement reporting\n\n## How we work with you\n\nEvery business account gets a named account manager who knows your setup. We start with a survey of your sites and current spend, design a package around what you actually need, install and configure everything, and then review the account with you regularly as your organisation grows.\n\n## Support that matches the stakes\n\nBusiness customers reach a dedicated support line staffed around the clock. Faults on business circuits are prioritised ahead of residential traffic, and service-level agreements are written into your contract rather than promised informally.\n\n## Talk to us\n\nTell us how many sites you run, how many staff need lines, and what your current setup costs. We will come back with a proposal and a clear monthly figure.\n\n## TODO: add sector case studies and published SLA figures once approved by the enterprise team.",
+      order: 19,
+      faqs: [
+        {
+          question: "What size of business do you work with?",
+          answer:
+            "All of them. The same team supports a single-office business taking one fibre line and a national organisation running dozens of sites, bulk messaging and a call centre.",
+        },
+        {
+          question: "Do business services come with a service-level agreement?",
+          answer:
+            "Yes. Fiber Optic and enterprise circuits carry a written SLA covering uptime and fault response times, agreed as part of your contract.",
+        },
+        {
+          question: "Can we put all our staff lines on one bill?",
+          answer:
+            "Yes. Corporate postpaid groups any number of lines onto a single monthly invoice, with per-line spending controls and an itemised statement.",
+        },
+        {
+          question: "How do we get a proposal?",
+          answer:
+            "Contact us with the number of sites and staff you need to connect. An account manager will survey your requirements and return a written proposal with a clear monthly cost.",
+        },
+      ],
+    },

@@ -1,38 +1,89 @@
-This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+# Somtel Somalia — Website
 
-## Getting Started
+The Somtel Somalia marketing site: Next.js 15 (App Router) + TypeScript, styled with
+Tailwind CSS and animated with Framer Motion. Content lives in a local SQLite database
+managed by Prisma — there is no external CMS.
 
-First, run the development server:
+## Requirements
+
+- Node.js 18.18 or newer
+- npm
+
+## Getting started
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
+npm install          # install dependencies
+cp .env.example .env # DATABASE_URL is the only variable the site needs
+npm run db:push      # create the SQLite database from prisma/schema.prisma
+npm run db:seed      # fill it with the site content
+npm run dev          # http://localhost:3000
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Scripts
 
-You can start editing the page by modifying `pages/index.tsx`. The page auto-updates as you edit the file.
+| Script | What it does |
+| --- | --- |
+| `npm run dev` | Development server with hot reload |
+| `npm run build` | Generates the Prisma client, then builds for production |
+| `npm start` | Serves the production build |
+| `npm run lint` | ESLint via `next lint` |
+| `npm run db:push` | Applies `prisma/schema.prisma` to the database |
+| `npm run db:seed` | Re-seeds all content (clears existing rows first) |
+| `npm run db:studio` | Opens Prisma Studio to browse and edit content |
 
-[API routes](https://nextjs.org/docs/api-routes/introduction) can be accessed on [http://localhost:3000/api/hello](http://localhost:3000/api/hello). This endpoint can be edited in `pages/api/hello.ts`.
+## Project structure
 
-The `pages/api` directory is mapped to `/api/*`. Files in this directory are treated as [API routes](https://nextjs.org/docs/api-routes/introduction) instead of React pages.
+```
+prisma/
+  schema.prisma        Database models
+  seed.ts              All site content — edit here, then `npm run db:seed`
+src/
+  app/                 App Router pages and API route handlers
+    [slug]/            One template serving all 15 product pages
+    Career/            Job board and job detail
+    blog/              Blog list and blog detail
+    api/               Route handlers, all returning { data, error }
+  components/
+    layout/            Navbar, Footer, mobile menu, theme toggle
+    sections/          Page sections (hero, pricing, FAQ, forms, job board)
+    ui/                Small shared building blocks
+    motion/            Framer Motion wrappers used across the site
+  lib/
+    db.ts              Prisma client + getSettings()
+    api.ts             Shared helpers for route handlers
+    content.ts         Date formatting and the small markdown renderer
+    navigation.ts      Menu and footer links
+  types/index.ts       Shared TypeScript types
+legacy/                The previous Pages Router site, kept for reference (not built, not committed)
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/basic-features/font-optimization) to automatically optimize and load Inter, a custom Google Font.
+Server Components read from Prisma directly. The `/api` routes exist for client-side
+interactions — the contact form, newsletter signup and job applications.
 
-## Learn More
+## Editing content
 
-To learn more about Next.js, take a look at the following resources:
+Almost everything on the site (products, plans, FAQs, blog posts, jobs, slides,
+testimonials, partners, phone numbers and social links) comes from the database.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+- For a one-off change, run `npm run db:studio` and edit the row.
+- For changes that should survive a re-seed, edit `prisma/seed.ts` and run `npm run db:seed`.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js/) - your feedback and contributions are welcome!
+## Deployment
 
-## Deploy on Vercel
+The site runs as a normal Node process behind the existing IIS reverse proxy.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+```bash
+npm ci
+npm run build
+NODE_ENV=production node server.js   # or: npm start
+```
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/deployment) for more details.
+`server.js` listens on `process.env.PORT`, defaulting to 3000.
+
+## Environment variables
+
+| Variable | Purpose |
+| --- | --- |
+| `DATABASE_URL` | SQLite connection string, e.g. `file:./dev.db` |
+
+`.env` is git-ignored. `.env.example` shows the expected shape.
