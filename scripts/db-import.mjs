@@ -20,9 +20,23 @@
 import { readFileSync } from "node:fs";
 import { PrismaClient } from "@prisma/client";
 
-const file = process.argv[2] ?? "prisma/export.json";
+const args = process.argv.slice(2);
+
+// Which database to write to.
+//
+// Defaults to DATABASE_URL, but --url wins. Moving rows into a *different*
+// database is the whole point of this pair — the local one to a hosted one,
+// or one host to another — and leaning on ambient environment for that is how
+// you end up importing into the wrong database and only noticing later.
+const url = args.find((a) => a.startsWith("--url="))?.slice(6);
+const file = args.find((a) => !a.startsWith("--")) ?? "prisma/export.json";
+
 const data = JSON.parse(readFileSync(file, "utf8"));
-const db = new PrismaClient();
+const db = new PrismaClient(url ? { datasources: { db: { url } } } : undefined);
+
+if (url) {
+  console.log("Target:", url.replace(/(:\/\/[^:]+:)[^@]*(@)/, "$1********$2"));
+}
 
 console.log(`Importing ${file} (exported ${data.exportedAt})`);
 
@@ -96,9 +110,9 @@ await load("jobApplications", data.jobApplications, db.jobApplication);
 //
 // Only PostgreSQL needs this. `Setting` is keyed by a string and has no
 // counter, so it is not in the list.
-const provider = process.env.DATABASE_URL ?? "";
+const target = url ?? process.env.DATABASE_URL ?? "";
 
-if (provider.startsWith("postgres")) {
+if (target.startsWith("postgres")) {
   const TABLES = [
     "Post", "Category", "Comment", "Event", "Job", "JobApplication",
     "Product", "Plan", "Faq", "Slide", "Testimonial", "Partner",
