@@ -10,6 +10,7 @@
 
 # next.js
 /.next/
+/.next-prod/
 /out/
 
 # production
@@ -35,9 +36,10 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
-# local env files
-.env
-.env*.local
+# local env files. Ignore every .env variant, then allow the example back in,
+# so a stray backup like .env.something can never be committed by accident.
+.env*
+!.env.example
 
 # prisma
 /prisma/dev.db
@@ -51,3 +53,9 @@ next-env.d.ts
 # ".git - Copy" is a 112MB copy of the object store.
 /.git - Copy/
 /package - Copy.json
+/public/assets - Copy/
+
+# Database dumps from scripts/db-export.mjs. They carry the admin password
+# hash and every site setting, so they stay out of the repository.
+/prisma/export.json
+/prisma/*.backup.json

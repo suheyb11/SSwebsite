@@ -9,7 +9,9 @@
     "lint": "next lint",
     "db:push": "prisma db push",
     "db:seed": "tsx prisma/seed.ts",
-    "db:studio": "prisma studio"
+    "db:studio": "prisma studio",
+    "db:export": "node scripts/db-export.mjs",
+    "db:import": "node scripts/db-import.mjs"
   },
   "dependencies": {
     "@prisma/client": "^6.19.3",

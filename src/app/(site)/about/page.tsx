@@ -250,7 +250,7 @@ export default async function AboutPage() {
 
       {/* Affiliated organisations */}
       {partners.length > 0 && (
-        <Section tone="muted">
+        <Section>
           <SectionTitle
             title={"Our affiliated organisations"}
             description={"We are committed to supporting the social and economic development of Somalia, so we've invested in key sectors to rebuild."}

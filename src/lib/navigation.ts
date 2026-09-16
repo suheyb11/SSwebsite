@@ -95,6 +95,7 @@ export const navigation: NavItem[] = [
         links: [
           { label: "Who We Are", route: "/about" },
           { label: "Careers", route: "/Career" },
+          { label: "Events", route: "/events" },
           { label: "Blog", route: "/blog" },
         ],
       },
@@ -138,6 +139,7 @@ export const footerLinks = {
     { label: "About Us", route: "/about" },
     { label: "Coverage", route: "/coverage" },
     { label: "Careers", route: "/Career" },
+    { label: "Events", route: "/events" },
     { label: "Blog", route: "/blog" },
     { label: "Contact", route: "/contact-us" },
   ],

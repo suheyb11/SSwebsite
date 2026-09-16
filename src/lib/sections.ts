@@ -15,6 +15,7 @@ export type SectionType =
   | "steps"
   | "timeline"
   | "checklist"
+  | "terms"
   | "video"
   | "faq"
   | "cta"
@@ -32,6 +33,11 @@ export type SectionItem = {
   value?: number;
   suffix?: string;
   prefix?: string;
+  /**
+   * A small label on the card — "Most chosen", "Best value". A card that has
+   * one is also the emphasised card in its row.
+   */
+  badge?: string;
   /** Turns a card into a link. */
   href?: string;
 };
@@ -86,6 +92,7 @@ const SECTION_TYPES: SectionType[] = [
   "steps",
   "timeline",
   "checklist",
+  "terms",
   "video",
   "faq",
   "cta",

@@ -1,5 +1,13 @@
 import Link from "next/link";
-import { ArrowRight, Megaphone, MessageSquare, Newspaper, Tag } from "lucide-react";
+import {
+  ArrowRight,
+  Briefcase,
+  CalendarDays,
+  Megaphone,
+  MessageSquare,
+  Newspaper,
+  Tag,
+} from "lucide-react";
 import { db } from "@/lib/db";
 import { AdminHeader, Panel, Pill } from "@/components/admin/ui";
 import { currentUser } from "./actions";
@@ -7,21 +15,45 @@ import { currentUser } from "./actions";
 export const metadata = { title: "Overview" };
 
 export default async function AdminHome() {
-  const [user, plans, posts, drafts, promos, livePromos, comments, hiddenComments] =
-    await Promise.all([
-      currentUser(),
-      db.plan.count(),
-      db.post.count(),
-      db.post.count({ where: { published: false } }),
-      db.promo.count(),
-      db.promo.count({ where: { active: true } }),
-      db.comment.count(),
-      db.comment.count({ where: { approved: false } }),
-    ]);
-
-  // What is on the site right now, so the first screen answers the first question.
+  // Everything this page shows, asked for at once.
+  //
+  // Awaiting these in groups would be three round trips where one will do:
+  // none of them depends on the answer to another, and the page cannot render
+  // until the last of them lands either way. "Still to come" and "open" are
+  // questions about the clock rather than about a flag, so `now` is fixed here
+  // and every count is measured against the same instant.
   const now = new Date();
-  const [banner, popup] = await Promise.all([
+
+  const [
+    user,
+    plans,
+    posts,
+    drafts,
+    promos,
+    livePromos,
+    comments,
+    hiddenComments,
+    events,
+    upcomingEvents,
+    jobs,
+    openJobs,
+    applications,
+    banner,
+    popup,
+  ] = await Promise.all([
+    currentUser(),
+    db.plan.count(),
+    db.post.count(),
+    db.post.count({ where: { published: false } }),
+    db.promo.count(),
+    db.promo.count({ where: { active: true } }),
+    db.comment.count(),
+    db.comment.count({ where: { approved: false } }),
+    db.event.count(),
+    db.event.count({ where: { published: true, startsAt: { gte: now } } }),
+    db.job.count(),
+    db.job.count({ where: { status: "Opened" } }),
+    db.jobApplication.count(),
     db.promo.findFirst({ where: { kind: "banner", active: true } }),
     db.promo.findFirst({ where: { kind: "popup", active: true } }),
   ]);
@@ -49,6 +81,20 @@ export default async function AdminHome() {
       note: hiddenComments > 0 ? `${hiddenComments} hidden` : "all visible",
     },
     {
+      href: "/admin/events",
+      Icon: CalendarDays,
+      label: "Events",
+      value: events,
+      note: upcomingEvents > 0 ? `${upcomingEvents} still to come` : "none coming up",
+    },
+    {
+      href: "/admin/careers",
+      Icon: Briefcase,
+      label: "Roles",
+      value: jobs,
+      note: `${openJobs} open · ${applications} ${applications === 1 ? "application" : "applications"}`,
+    },
+    {
       href: "/admin/promos",
       Icon: Megaphone,
       label: "Offers & popups",
@@ -64,7 +110,7 @@ export default async function AdminHome() {
         description="Everything the public site shows is edited from here. Changes go live immediately."
       />
 
-      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
         {cards.map(({ href, Icon, label, value, note }) => (
           <Link key={href} href={href} className="group">
             <Panel className="h-full transition-colors group-hover:border-gray-300">

@@ -21,7 +21,13 @@ import { useEffect, useRef, useState, type ReactNode } from "react";
 const EASE = [0.22, 1, 0.36, 1] as const;
 
 /** Shared viewport settings: animate once, slightly before the element is centred. */
-const VIEWPORT = { once: true, margin: "-80px" } as const;
+// No inset. With a negative margin an element sitting near the edge of the
+// viewport never counts as "in view", so its reveal never fires and — because
+// these start at opacity 0 — the content stays invisible rather than merely
+// un-animated. Firing as soon as any part of it is on screen is the safer
+// default; a reveal that runs slightly early costs nothing, one that never runs
+// hides the page.
+const VIEWPORT = { once: true, amount: 0 } as const;
 
 /** Fades content in as it scrolls into view. Animates once. */
 export function FadeIn({

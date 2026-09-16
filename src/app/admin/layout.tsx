@@ -1,7 +1,17 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import Image from "next/image";
-import { LayoutDashboard, LogOut, Megaphone, MessageSquare, Newspaper, Settings, Tag } from "lucide-react";
+import {
+  Briefcase,
+  CalendarDays,
+  LayoutDashboard,
+  LogOut,
+  Megaphone,
+  MessageSquare,
+  Newspaper,
+  Settings,
+  Tag,
+} from "lucide-react";
 import { currentUser, logout } from "./actions";
 
 export const metadata: Metadata = {
@@ -15,6 +25,8 @@ const nav = [
   { href: "/admin/plans", label: "Prices & plans", Icon: Tag },
   { href: "/admin/blog", label: "Blog", Icon: Newspaper },
   { href: "/admin/comments", label: "Comments", Icon: MessageSquare },
+  { href: "/admin/events", label: "Events", Icon: CalendarDays },
+  { href: "/admin/careers", label: "Careers", Icon: Briefcase },
   { href: "/admin/promos", label: "Offers & popups", Icon: Megaphone },
   { href: "/admin/settings", label: "Settings", Icon: Settings },
 ];

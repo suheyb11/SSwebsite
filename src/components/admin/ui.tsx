@@ -172,8 +172,31 @@ export function AdminButton({
   );
 }
 
-/** Confirmation after a save or a delete. Read from the URL, so it survives the redirect. */
-export function Flash({ saved, deleted }: { saved?: boolean; deleted?: boolean }) {
+/**
+ * Confirmation after a save or a delete, and the one error the forms can
+ * produce that the admin can actually fix. All read from the URL, so they
+ * survive the redirect a Server Action ends with.
+ */
+export function Flash({
+  saved,
+  deleted,
+  error,
+}: {
+  saved?: boolean;
+  deleted?: boolean;
+  error?: string;
+}) {
+  if (error) {
+    return (
+      <p
+        role="alert"
+        className="mb-6 rounded-lg border border-primary-600 bg-primary-50 px-4 py-3 text-sm font-medium text-primary-700"
+      >
+        {error}
+      </p>
+    );
+  }
+
   if (!saved && !deleted) return null;
 
   return (
@@ -186,6 +209,7 @@ export function Flash({ saved, deleted }: { saved?: boolean; deleted?: boolean }
   );
 }
 
+
 /** A simple data table. */
 export function Table({ head, children }: { head: string[]; children: ReactNode }) {
   return (
@@ -193,9 +217,11 @@ export function Table({ head, children }: { head: string[]; children: ReactNode 
       <table className="w-full text-left text-sm">
         <thead>
           <tr className="border-b border-gray-200 bg-white">
-            {head.map((cell) => (
+            {/* Keyed by position, not by text: the action columns are deliberately
+                blank, and two empty headings are not the same heading. */}
+            {head.map((cell, i) => (
               <th
-                key={cell}
+                key={i}
                 className="whitespace-nowrap px-4 py-3 text-xs font-semibold uppercase tracking-[0.14em] text-muted"
               >
                 {cell}

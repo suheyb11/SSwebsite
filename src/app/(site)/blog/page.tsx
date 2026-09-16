@@ -1,9 +1,11 @@
 import Link from "next/link";
+import { redirect } from "next/navigation";
 import type { Metadata } from "next";
-import { ArrowLeft, ArrowRight, PenLine } from "lucide-react";
+import { ArrowLeft, ArrowRight, ArrowUpRight, PenLine } from "lucide-react";
 import { db } from "@/lib/db";
+import { categoryHref, EVENTS_CATEGORY_SLUG } from "@/lib/content";
 import { PageHeader, Section, cx } from "@/components/ui";
-import { FadeIn, HoverLift, Stagger, StaggerItem } from "@/components/motion";
+import { HoverLift } from "@/components/motion";
 import BlogCover from "@/components/sections/BlogCover";
 import PostCard, { PostMeta, postCardSelect, type PostCardView } from "@/components/sections/PostCard";
 
@@ -22,6 +24,11 @@ export default async function BlogPage({
   const params = await searchParams;
   const page = Math.max(1, Number(params.page) || 1);
   const category = params.category;
+
+  // Events live on their own page now. Anyone landing on the old filter URL —
+  // a bookmark, or a link from before — is sent there rather than shown a list
+  // of posts that no longer represents what is happening.
+  if (category === EVENTS_CATEGORY_SLUG) redirect("/events");
 
   const where = {
     published: true,
@@ -67,24 +74,35 @@ export default async function BlogPage({
         {/* Categories as a row of filters rather than a sidebar list: it reads
             at a glance and survives being narrowed to a phone. */}
         {categories.length > 0 && (
-          <FadeIn>
+          <div>
             <nav aria-label="Filter by category" className="flex flex-wrap items-center gap-2">
               <FilterChip href="/blog" active={!category}>
                 All posts
               </FilterChip>
 
-              {categories.map((cat) => (
-                <FilterChip
-                  key={cat.id}
-                  href={`/blog?category=${cat.slug}`}
-                  active={category === cat.slug}
-                >
-                  {cat.name}
-                  <Count>{cat._count.posts}</Count>
-                </FilterChip>
-              ))}
+              {categories.map((cat) => {
+                // Events have a section of their own now, with dates, venues
+                // and an upcoming/past split that a blog category cannot show.
+                // This chip hands over to it rather than filtering posts.
+                const toEvents = cat.slug === EVENTS_CATEGORY_SLUG;
+
+                return (
+                  <FilterChip
+                    key={cat.id}
+                    href={categoryHref(cat.slug)}
+                    active={!toEvents && category === cat.slug}
+                  >
+                    {cat.name}
+                    {toEvents ? (
+                      <ArrowUpRight size={14} aria-hidden="true" />
+                    ) : (
+                      <Count>{cat._count.posts}</Count>
+                    )}
+                  </FilterChip>
+                );
+              })}
             </nav>
-          </FadeIn>
+          </div>
         )}
 
         {activeCategory && (
@@ -117,20 +135,24 @@ export default async function BlogPage({
           <>
             {lead && <LeadCard post={lead} />}
 
-            <Stagger
+            {/*
+              Rendered plainly, with no scroll-triggered reveal. The category
+              tabs re-render this grid, the reveal only fires once, and the
+              cards start at opacity 0 — so switching tabs left the posts in the
+              page but invisible. Hover still lifts them.
+            */}
+            <div
               className={cx(
                 "grid gap-6 sm:grid-cols-2 lg:grid-cols-3",
                 lead ? "mt-6" : "mt-10"
               )}
             >
               {rest.map((post) => (
-                <StaggerItem key={post.id}>
-                  <HoverLift className="h-full">
-                    <PostCard post={post} />
-                  </HoverLift>
-                </StaggerItem>
+                <HoverLift key={post.id} className="h-full">
+                  <PostCard post={post} />
+                </HoverLift>
               ))}
-            </Stagger>
+            </div>
           </>
         )}
 
@@ -176,7 +198,7 @@ export default async function BlogPage({
 /** The newest post, given the width it deserves. */
 function LeadCard({ post }: { post: PostCardView }) {
   return (
-    <FadeIn>
+    <>
       <article className="group mt-10 grid overflow-hidden rounded-3xl border border-border-strong bg-white transition-[border-color,box-shadow] duration-300 hover:border-primary-400 hover:shadow-lift lg:grid-cols-2">
         <Link
           href={`/blog/${post.slug}`}
@@ -224,7 +246,7 @@ function LeadCard({ post }: { post: PostCardView }) {
           </div>
         </div>
       </article>
-    </FadeIn>
+    </>
   );
 }
 
@@ -236,7 +258,7 @@ function Tags({ categories }: { categories: { id: number; name: string; slug: st
       {categories.map((cat) => (
         <Link
           key={cat.id}
-          href={`/blog?category=${cat.slug}`}
+          href={categoryHref(cat.slug)}
           className="rounded-full border border-border px-3 py-1 text-xs font-medium text-muted transition-colors hover:border-accent-500 hover:bg-accent-500 hover:text-primary-700"
         >
           {cat.name}

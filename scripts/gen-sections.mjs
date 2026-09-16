@@ -24,48 +24,50 @@ const SKIP = new Set(["home-internet"]);
 // always crisp, nothing to download, and no white box behind them.
 const I = (name) => `illus:${name}`;
 
-// Videos, chosen against three rules: landscape (not the vertical, TikTok-shaped
+const VIDEO_META = {
+  Muraadso: "1:04 · 111 MB · 1080p",
+  business: "1:07 · 720p · YouTube",
+  Prepaid: "1:02 · 720p · YouTube",
+  bundles: "1:22 · 1080p · Facebook",
+  Kaafiye: "0:50 · 576p · Facebook",
+};
+
+// Videos, chosen against three rules: landscape (not the vertical, phone-shaped
 // social cuts), good quality, and informational about a service rather than a
 // price promotion.
 //
-// Those rules rule out most of the YouTube channel. Of its 15 uploads, twelve are
-// portrait or square — shot for Facebook and TikTok feeds, and letterboxed with
-// black bars in a 16:9 frame on a desktop page. Measured from each watch page:
+// Measuring matters here. Reading width and height out of a YouTube watch page
+// with a loose regex gives 1920x1080 for everything — that number is page
+// config, not the video. The reliable readings come from the stream formats
+// (each itag block carrying a video mimeType) and from whether YouTube itself
+// lists the video as a Short. Both agree, and by them most of the channel is
+// vertical:
 //
-//   grwp25qfdC4  464x832    portrait    Muraadso ad
-//   3ElCQyz0fWY  576x1024   portrait    5G campaign
-//   CmW3Aa_b-No  576x1024   portrait    5G campaign
-//   DifytuDAZZo  576x1024   portrait    5G campaign
-//   bekKPYRDAzM  576x1024   portrait    5G campaign
-//   6ybd3TmpWn0  1080x1920  portrait    5G campaign
-//   YtmQrcFu5EU  1080x1920  portrait    5G campaign
-//   H5U03D5OUeE  360x640    portrait    5G campaign
-//   sBR_bFPVntY  576x1024   portrait    5G campaign
-//   lG1CEKc-4XM  1080x1350  portrait    Dhamays — and a discount ad besides
-//   zbBmhH8GXAs  1080x1080  square      DahabPlus testimonial
-//   QSn2I6nbWLE  360x360    square      "Untitled video"
-//   OU6wmQjMXtk  1920x1080  LANDSCAPE   Eid greeting — not about a service
-//   rEZ5JNdOD_Q  1280x720   LANDSCAPE   campaign recap — an event, not a service
-//   -qEuryrL77k  1280x720   LANDSCAPE   informational: what Somtel and 5G offer
+//   576x1024  Short      bekKPYRDAzM, 3ElCQyz0fWY, CmW3Aa_b-No, sBR_bFPVntY
+//   1080x1080 Short      zbBmhH8GXAs  (DahabPlus testimonial)
+//   1280x720  landscape  -qEuryrL77k  informational: what Somtel and 5G offer
+//   1280x720  landscape  rEZ5JNdOD_Q  campaign recap
 //
-// So exactly one upload passes all three rules.
-//
-// The player also understands "fb:<post url>" for a public Facebook video.
-// TODO: Facebook blocks unauthenticated browsing, so its videos cannot be found
-// from here — send the post URLs and they drop straight in.
-// What each video costs to watch. Measured with scripts/probe-video.mjs.
-const VIDEO_META = {
-  Muraadso: "1:04 · 111 MB · 1080p",
-};
-
+// Facebook reels are measured from the <video> element inside the public video
+// plugin, which reports the true size.
 const VIDEO = {
-  // The produced Somtel film, served from /public at the client's request.
+  // The produced Somtel film, served from /public at the client"s request.
   // TODO: this file is 110 MB. Compress before launch:
-  //   ffmpeg -i in.mp4 -vf scale=1280:-2 -c:v libx264 -crf 28 -preset slow   //          -c:a aac -b:a 96k -movflags +faststart out.mp4
+  //   ffmpeg -i in.mp4 -vf scale=1280:-2 -c:v libx264 -crf 28 -preset slow
+  //          -c:a aac -b:a 96k -movflags +faststart out.mp4
   Muraadso: "/assets/videos/final_adeega_muraadso_video.mp4",
 
-  // "Ma ogtahay macaamiil?" — 1280x720, explains Somtel and the 5G rollout.
+  // "Ma ogtahay macaamiil?" — 1280x720, Somtel and the 5G rollout.
   business: "yt:-qEuryrL77k",
+
+  // The fifth-generation campaign launch. Landscape, though it records an event
+  // rather than explaining a service.
+  Prepaid: "yt:rEZ5JNdOD_Q",
+
+  // Reels from Somtel"s Facebook page, picked by the client. Both landscape:
+  // 1920x1080 and 1024x576, measured in the browser.
+  bundles: "fb:https://www.facebook.com/reel/2081862155670060",
+  Kaafiye: "fb:https://www.facebook.com/reel/1528377462640235",
 };
 
 // One dedicated drawing per page. No two pages open on the same motif.

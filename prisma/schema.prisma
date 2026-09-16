@@ -1,8 +1,22 @@
-// Somtel Somalia — local SQLite database (replaces the old Strapi CMS).
-// Run `npm run db:push` after editing, then `npm run db:seed`.
+// Somtel Somalia — the site's database (replaces the old Strapi CMS).
+// Run `npm run db:push` after editing.
+//
+// PostgreSQL, locally and in a deployment both. It used to be a SQLite file,
+// which was fine on one laptop but cannot be deployed: the pages are built
+// from the database, the build server runs those queries, and a file on
+// someone's disk is not reachable from there. The models did not change in the
+// move — the same schema validates against either — so the only difference is
+// the provider on the next line and what DATABASE_URL points at.
+//
+// Locally that is the PostgreSQL 18 service on this machine. In a deployment
+// it is a hosted database; see .env.example.
+//
+// `npm run db:export` writes every table to prisma/export.json and
+// `npm run db:import` reads it back, which is how the data came across and how
+// it can be moved again — to a hosted database, or to another machine.
 
 datasource db {
-  provider = "sqlite"
+  provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
@@ -70,6 +84,42 @@ model Comment {
   @@index([postId, parentId])
 }
 
+// ---------- Events ----------
+//
+// Launches, roadshows, sponsorships and community days. The page splits them by
+// date rather than by a flag, so nothing has to be moved from one list to the
+// other by hand: an event becomes "past" when its own end time goes by.
+
+model Event {
+  id      Int     @id @default(autoincrement())
+  slug    String  @unique
+  title   String
+  summary String?
+  body    String // markdown
+  imageUrl String?
+
+  /** Where it happens. Both optional — some events are online. */
+  venue String?
+  city  String?
+
+  startsAt DateTime
+  /** Blank for a single-moment event; set for one that runs over days. */
+  endsAt   DateTime?
+
+  /** A link out to tickets, a registration form, or the announcement post. */
+  ctaLabel String?
+  ctaHref  String?
+
+  published Boolean @default(true)
+  /** The one given the large card at the top of the page. */
+  featured  Boolean @default(false)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([startsAt])
+}
+
 // ---------- Careers (replaces Strapi `careers`) ----------
 
 model Job {
@@ -133,7 +183,11 @@ model Plan {
   title     String
   price     Float
   unit      String?
-  features  String // JSON array of strings (SQLite has no array type)
+  // A JSON array of strings. PostgreSQL does have a real array type, but this
+  // column outlived the SQLite database it was shaped for and the parsing lives
+  // in one place (parseFeatures in lib/content.ts) — changing it would be a
+  // migration for no gain, since nothing ever queries inside it.
+  features  String
   highlight Boolean @default(false)
   order     Int     @default(0)
 
@@ -237,7 +291,8 @@ model CoverageArea {
   id       Int     @id @default(autoincrement())
   region   String
   city     String
-  services String // JSON array of strings, same convention as Plan.features
+  /// A JSON array of strings, the same convention as Plan.features.
+  services String
   note     String?
   order    Int     @default(0)
 

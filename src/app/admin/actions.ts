@@ -14,6 +14,8 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { cookies } from "next/headers";
 import { db } from "@/lib/db";
+import { slugify } from "@/lib/content";
+import { fromDateInput } from "@/lib/datetime-input";
 import { verifyPassword } from "@/lib/auth";
 import { SESSION_COOKIE, SESSION_MAX_AGE, createSession, readSession } from "@/lib/session";
 
@@ -40,6 +42,52 @@ async function requireUser() {
 function revalidateSite() {
   revalidatePath("/", "layout");
 }
+
+/**
+ * The web address for a new row: whatever the admin typed, or the title turned
+ * into one. Always run through `slugify`, so a slug typed with capitals, spaces
+ * or an apostrophe still comes out as a usable address.
+ */
+function slugFrom(formData: FormData, titleField: string) {
+  const typed = String(formData.get("slug") ?? "").trim();
+  const slug = slugify(typed || String(formData.get(titleField) ?? ""));
+
+  // Only reachable if the title was empty too, which the form prevents.
+  return slug || `untitled-${Date.now()}`;
+}
+
+/** Prisma's "a row with this unique value already exists". */
+function isDuplicate(error: unknown) {
+  return (
+    typeof error === "object" &&
+    error !== null &&
+    (error as { code?: string }).code === "P2002"
+  );
+}
+
+/**
+ * Runs a create or an update and ends the request the way the dashboard
+ * expects.
+ *
+ * Two web addresses cannot be the same, and the admin has no way to know which
+ * ones are taken. Rather than letting Prisma's error reach the error page —
+ * where the half-typed form is lost — the clash comes back to the same form
+ * with a message, and everything that was typed is still in the fields.
+ */
+async function writing(base: string, id: number | null, write: () => Promise<unknown>) {
+  try {
+    await write();
+  } catch (error) {
+    if (isDuplicate(error)) {
+      redirect(`${base}?${id ? `edit=${id}` : "new=1"}&error=slug`);
+    }
+    throw error;
+  }
+
+  revalidateSite();
+  redirect(`${base}?saved=1`);
+}
+
 
 // ---------- sign in / out ----------
 
@@ -278,4 +326,98 @@ export async function deletePromo(formData: FormData) {
 
   revalidateSite();
   redirect("/admin/promos?deleted=1");
+}
+
+// ---------- events ----------
+//
+// Events are not blog posts: they carry a date, a place and an upcoming/past
+// split that the site works out from the date itself. Nothing has to be moved
+// between the two lists by hand — an event becomes "past" when its end time
+// goes by, so the only date that matters here is the real one.
+
+export async function saveEvent(formData: FormData) {
+  await requireUser();
+
+  const id = Number(formData.get("id")) || null;
+  const startsAt = fromDateInput(formData.get("startsAt"));
+
+  // The one field with no sensible default: an event without a date cannot be
+  // placed on the page at all.
+  if (!startsAt) {
+    redirect(`/admin/events?${id ? `edit=${id}` : "new=1"}&error=date`);
+  }
+
+  const data = {
+    title: String(formData.get("title") ?? "").trim(),
+    slug: slugFrom(formData, "title"),
+    summary: String(formData.get("summary") ?? "").trim() || null,
+    body: String(formData.get("body") ?? ""),
+    imageUrl: String(formData.get("imageUrl") ?? "").trim() || null,
+    venue: String(formData.get("venue") ?? "").trim() || null,
+    city: String(formData.get("city") ?? "").trim() || null,
+    startsAt,
+    endsAt: fromDateInput(formData.get("endsAt")),
+    ctaLabel: String(formData.get("ctaLabel") ?? "").trim() || null,
+    ctaHref: String(formData.get("ctaHref") ?? "").trim() || null,
+    published: formData.get("published") === "on",
+    featured: formData.get("featured") === "on",
+  };
+
+  await writing("/admin/events", id, () =>
+    id ? db.event.update({ where: { id }, data }) : db.event.create({ data })
+  );
+}
+
+export async function deleteEvent(formData: FormData) {
+  await requireUser();
+
+  await db.event.delete({ where: { id: Number(formData.get("id")) } });
+
+  revalidateSite();
+  redirect("/admin/events?deleted=1");
+}
+
+// ---------- careers ----------
+
+export async function saveJob(formData: FormData) {
+  await requireUser();
+
+  const id = Number(formData.get("id")) || null;
+
+  const data = {
+    title: String(formData.get("title") ?? "").trim(),
+    slug: slugFrom(formData, "title"),
+    type: String(formData.get("type") ?? "").trim() || null,
+    location: String(formData.get("location") ?? "").trim() || null,
+    department: String(formData.get("department") ?? "").trim() || null,
+    detail: String(formData.get("detail") ?? ""),
+    deadline: fromDateInput(formData.get("deadline")),
+    // "Opened" and "Closed" are the two words the careers page and the apply
+    // route both test against, so the toggle has to come back out as one of
+    // them rather than as a boolean.
+    status: formData.get("statusOpen") === "on" ? "Opened" : "Closed",
+  };
+
+  await writing("/admin/careers", id, () =>
+    id ? db.job.update({ where: { id }, data }) : db.job.create({ data })
+  );
+}
+
+export async function deleteJob(formData: FormData) {
+  await requireUser();
+
+  // Applications are attached to the role and go with it — the schema cascades,
+  // which is why the page warns before the button is pressed.
+  await db.job.delete({ where: { id: Number(formData.get("id")) } });
+
+  revalidateSite();
+  redirect("/admin/careers?deleted=1");
+}
+
+export async function deleteApplication(formData: FormData) {
+  await requireUser();
+
+  await db.jobApplication.delete({ where: { id: Number(formData.get("id")) } });
+
+  redirect("/admin/careers/applications?deleted=1");
 }

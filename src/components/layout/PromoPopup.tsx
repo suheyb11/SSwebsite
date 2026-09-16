@@ -18,6 +18,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { ArrowRight, X } from "lucide-react";
+import { cx } from "@/components/ui";
 import Illustration, { type IllustrationName } from "@/components/ui/Illustration";
 import VideoPlayer from "@/components/sections/VideoPlayer";
 
@@ -97,7 +98,7 @@ export default function PromoPopup({ promo }: { promo: PromoView }) {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            transition={{ duration: reduce ? 0.12 : 0.25 }}
+            transition={{ duration: reduce ? 0.12 : 0.55 }}
             onClick={close}
             aria-hidden="true"
           />
@@ -115,13 +116,24 @@ export default function PromoPopup({ promo }: { promo: PromoView }) {
               role="dialog"
               aria-modal="true"
               aria-label={promo.title}
-              initial={{ opacity: 0, y: reduce ? 0 : 24, scale: reduce ? 1 : 0.97 }}
+              initial={{ opacity: 0, y: reduce ? 0 : 18, scale: reduce ? 1 : 0.96 }}
               animate={{ opacity: 1, y: 0, scale: 1 }}
               exit={{ opacity: 0, y: reduce ? 0 : 16, scale: reduce ? 1 : 0.98 }}
-              transition={{ duration: reduce ? 0.15 : 0.35, ease: [0.22, 1, 0.36, 1] }}
-              className="w-full max-w-lg"
+              transition={{ duration: reduce ? 0.2 : 0.75, ease: [0.16, 1, 0.3, 1] }}
+              className={cx("w-full", video ? "max-w-3xl" : "max-w-lg")}
             >
-              <div className="relative max-h-[88vh] overflow-y-auto overscroll-contain rounded-2xl border border-border-strong bg-bg shadow-lift">
+              {/*
+                With a video the card turns side-on from sm up: the clip on the
+                left, the words beside it. Stacked, a portrait reel made the
+                popup a tall narrow column that ran past the bottom of the
+                screen and put its own buttons behind a scrollbar.
+              */}
+              <div
+                className={cx(
+                  "relative max-h-[88vh] overflow-y-auto overscroll-contain rounded-2xl border border-border-strong bg-bg shadow-lift",
+                  video && "sm:grid sm:grid-cols-[minmax(0,1fr)_minmax(0,1.1fr)] sm:items-center"
+                )}
+              >
                 <button
                   type="button"
                   onClick={close}
@@ -133,7 +145,19 @@ export default function PromoPopup({ promo }: { promo: PromoView }) {
 
                 {/* Media */}
                 {video && media ? (
-                  <VideoPlayer source={media} poster={null} label={promo.title} />
+                  // 4:5 because the reel is 1080x1350 — a widescreen frame
+                  // would squeeze it into a strip between two black bands. It
+                  // is the column beside the copy that gives the card its
+                  // width, rather than the clip being stretched to find it.
+                  <VideoPlayer
+                    source={media}
+                    poster={null}
+                    label="Play video"
+                    aspect="aspect-[4/5]"
+                    // The card already rounds and clips this corner; rounding
+                    // it again put a second curve inside the first.
+                    frameClass="h-full"
+                  />
                 ) : illustration ? (
                   <div className="relative bg-primary-700 py-5 sm:py-6">
                     <span aria-hidden="true" className="brand-mesh absolute inset-0 opacity-70" />

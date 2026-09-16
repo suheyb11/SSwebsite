@@ -628,3 +628,18 @@ const drawings: Record<IllustrationName, (p: { c: Colors }) => ReactElement> = {
     </g>
   ),
 };
+
+/**
+ * A drawing for an event, picked from its title.
+ *
+ * Events rarely carry a photograph, and a card with nothing in it reads as
+ * broken rather than plain. Both the events list and the event page ask for
+ * this, so the guess lives here and the two cannot drift apart.
+ */
+export function illustrationForEvent(title: string): IllustrationName {
+  if (/5g|network|coverage|launch/i.test(title)) return "signal";
+  if (/edahab|dahabplus|merchant|money/i.test(title)) return "wallet";
+  if (/fib(re|er)|home/i.test(title)) return "fibre";
+  if (/school|community|programme/i.test(title)) return "support";
+  return "building";
+}

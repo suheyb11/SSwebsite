@@ -20,12 +20,18 @@ export default function VideoPlayer({
   poster,
   label,
   meta,
+  aspect = "aspect-video",
+  frameClass,
 }: {
   source: string;
   poster?: string | null;
   label: string;
   /** Length and weight, shown under the play button before anything downloads. */
   meta?: string | null;
+  /** The frame's shape, as a Tailwind aspect class. Override for a tall clip. */
+  aspect?: string;
+  /** Overrides the outer frame — used where a parent already rounds and clips. */
+  frameClass?: string;
 }) {
   const [playing, setPlaying] = useState(false);
   const reduce = useReducedMotion();
@@ -44,10 +50,17 @@ export default function VideoPlayer({
     : null;
 
   return (
-    <div className="relative overflow-hidden rounded-2xl border border-border-strong bg-primary-700">
-      {/* 16:9 keeps the box the right height before anything loads, so nothing
-          shifts when the player appears. */}
-      <div className="aspect-video w-full">
+    <div
+      className={cx(
+        "relative overflow-hidden bg-primary-700",
+        frameClass ?? "rounded-2xl border border-border-strong"
+      )}
+    >
+      {/* A fixed shape keeps the box the right height before anything loads, so
+          nothing shifts when the player appears. Most clips are 16:9; a caller
+          showing a taller one passes its own ratio, otherwise the video would
+          sit in the middle of the frame between two bands of black. */}
+      <div className={cx("w-full", aspect)}>
         {playing ? (
           youtube || facebook ? (
             <iframe
@@ -83,9 +96,12 @@ export default function VideoPlayer({
           >
             <span aria-hidden="true" className="brand-mesh absolute inset-0 opacity-80" />
 
+            {/* The drawing is scenery behind the button, not something to read.
+                Kept faint and well clear of the label underneath, which it was
+                otherwise crossing through. */}
             {illustration && (
-              <span aria-hidden="true" className="absolute inset-0 grid place-items-center opacity-40">
-                <Illustration name={illustration} tone="navy" className="max-w-[18rem]" />
+              <span aria-hidden="true" className="absolute inset-0 grid place-items-center opacity-[0.18]">
+                <Illustration name={illustration} tone="navy" className="max-w-[13rem]" />
               </span>
             )}
 

@@ -160,6 +160,7 @@ async function main() {
   console.log("Clearing existing data...");
   await db.jobApplication.deleteMany();
   await db.job.deleteMany();
+  await db.event.deleteMany();
   await db.plan.deleteMany();
   await db.faq.deleteMany();
   await db.coverageArea.deleteMany();
@@ -1905,6 +1906,100 @@ async function main() {
       postedDate: new Date("2025-05-20"),
     },
   });
+
+
+  // ---------- Events ----------
+  //
+  // Dates are relative to the day the seed runs, so the page always has
+  // something in both columns. A fixed calendar would quietly become "all past"
+  // and the upcoming half of the events page would look broken.
+  //
+  // TODO: replace these with the real Somtel calendar from the marketing team.
+  // The shape is right; the particulars are placeholders.
+  console.log("Seeding events...");
+
+  const day = 24 * 60 * 60 * 1000;
+  const from = (days: number, hour = 9) => {
+    const d = new Date(Date.now() + days * day);
+    d.setHours(hour, 0, 0, 0);
+    return d;
+  };
+
+  const eventRows = [
+    {
+      slug: "jiilka-maanta-5g-launch-mogadishu",
+      title: "Jiilka Maanta 5G — Mogadishu launch",
+      summary:
+        "The 5G network switches on across Banaadir, with live speed tests, device offers and the team on hand to move your line over.",
+      body:
+        "## What is happening\n\nSomtel is switching on 5G across Mogadishu, district by district. The launch day brings the network team, the device team and customer care into one hall so you can see the speeds for yourself and leave with your line already migrated.\n\n## On the day\n\n- Live speed tests against the 4G network you are on now\n- Device clinic: check whether your handset supports 5G, and move your number to an eSIM while you wait\n- Bundle desk for Kaafiye Plus and Dhamays Plus\n- Registration for Fiber Home in newly covered streets\n\n## Who should come\n\nAnyone on a Somtel line in Banaadir, and any business weighing up a dedicated circuit. Entry is free and no registration is needed.",
+      venue: "Somtel HQ, Howlwadag",
+      city: "Mogadishu",
+      startsAt: from(12),
+      endsAt: from(12, 17),
+      ctaLabel: "Check coverage in your area",
+      ctaHref: "/coverage",
+      featured: true,
+    },
+    {
+      slug: "edahab-merchant-day-hargeisa",
+      title: "eDahab merchant day — Hargeisa",
+      summary:
+        "A working session for shopkeepers and agents: taking payments with DahabPlus, settling daily, and keeping a float that does not run dry.",
+      body:
+        "## For people who take money all day\n\nThis is a practical session rather than a presentation. Bring the handset you use in the shop and leave with it set up.\n\n## Covered\n\n- Registering as a merchant and getting your till number\n- Taking a payment, refunding one, and reading the day's statement\n- Managing your float across the agent network\n- Spotting the common fraud attempts and what to do about them\n\n## Bring\n\nYour identification, the handset you trade with, and your merchant number if you already have one.",
+      venue: "Maansoor Hotel",
+      city: "Hargeisa",
+      startsAt: from(26),
+      endsAt: null,
+      ctaLabel: "About eDahab",
+      ctaHref: "/eDahab",
+    },
+    {
+      slug: "fibre-to-the-home-bosaso",
+      title: "Fiber Home comes to Bosaso",
+      summary:
+        "Registration opens for fibre in the first Bosaso streets, with installation slots booked on the day.",
+      body:
+        "## Fibre reaches Bosaso\n\nThe first fibre routes into Bosaso are live, and registration opens for households on the streets they pass.\n\n## What to expect\n\n- Check your street against the route map\n- Choose a speed and book an installation slot\n- See the router and the speeds it delivers, running on the live network\n\n## If your street is not on the map\n\nLeave your address with the team. The build continues through the year and the list decides what gets connected next.",
+      venue: "Somtel Customer Care Centre",
+      city: "Bosaso",
+      startsAt: from(45),
+      endsAt: null,
+      ctaLabel: "See fibre plans",
+      ctaHref: "/fiberoptic",
+    },
+    {
+      slug: "somtel-anniversary-celebration-2026",
+      title: "Somtel anniversary celebration",
+      summary:
+        "Customers, partners and staff marked another year of the network, with awards for the agents who carried the most traffic.",
+      body:
+        "## Another year on\n\nSomtel marked its anniversary with the customers, partners and staff who built the year. The evening recognised the agent network — the people who keep cash-in and cash-out within reach of every community we serve.\n\n## Looking back on the year\n\n- 5G switched on in the first cities\n- Fibre routes extended across Mogadishu and Hargeisa\n- eDahab agent coverage widened into smaller towns\n\nThank you to everyone who came.",
+      venue: "Jazeera Palace Hotel",
+      city: "Mogadishu",
+      startsAt: from(-38, 18),
+      endsAt: null,
+      ctaLabel: "Read the story",
+      ctaHref: "/blog/somtel-anniversary-celebration",
+    },
+    {
+      slug: "school-connectivity-programme-burco",
+      title: "School connectivity programme — Burco",
+      summary:
+        "Six secondary schools connected to fibre, with the equipment and the first year of service donated.",
+      body:
+        "## Connecting classrooms\n\nSix secondary schools in Burco were connected to Somtel fibre, with routers, installation and the first year of service provided at no cost to the schools.\n\n## Why\n\nA school with a connection can reach material no library in the region holds. The programme continues: schools that want to be considered can write to customer care.",
+      venue: "Burco Education Office",
+      city: "Burco",
+      startsAt: from(-96, 10),
+      endsAt: null,
+      ctaLabel: null,
+      ctaHref: null,
+    },
+  ];
+
+  for (const event of eventRows) await db.event.create({ data: event });
 
   // ---------- Jobs ----------
   console.log("Seeding jobs...");

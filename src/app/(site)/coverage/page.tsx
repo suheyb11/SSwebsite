@@ -1,6 +1,6 @@
 import Image from "next/image";
 import type { Metadata } from "next";
-import { Antenna, Building2, MapPin, Phone, Radio, Wifi } from "lucide-react";
+import { Building2, MapPin, Radio, Wifi } from "lucide-react";
 import { db, getSettings } from "@/lib/db";
 import { parseFeatures } from "@/lib/content";
 import { Badge, Button, Card, PageHeader, Section, SectionTitle } from "@/components/ui";
@@ -40,14 +40,6 @@ export default async function CoveragePage() {
     db.store.findMany({ orderBy: { order: "asc" } }),
     getSettings(),
   ]);
-
-  // Group the flat list into regions so the page reads like a directory.
-  const regions: { region: string; cities: typeof areas }[] = [];
-  for (const area of areas) {
-  const existing = regions.find((r) => r.region === area.region);
-    if (existing) existing.cities.push(area);
-    else regions.push({ region: area.region, cities: [area] });
-  }
 
   return (
     <>
@@ -121,35 +113,45 @@ export default async function CoveragePage() {
           description="Every city we serve, with the Somtel services currently live there."
         />
 
-        <div className="space-y-12">
-          {regions.map((group) => (
-            <FadeIn key={group.region}>
-              <h3 className="flex items-center gap-2.5 text-lg font-semibold text-fg">
-                <MapPin size={18} className="text-accent-500" aria-hidden="true" />
-                {group.region}
-              </h3>
+        {/*
+          A dense list rather than a card per city.
+          16 cities spread across 14 regions, 11 of which hold a single city, so
+          grouping meant fourteen headings each introducing one card — the
+          directory alone ran longer than the rest of the page put together, and
+          said nothing the search box above does not already answer on demand.
+        */}
+        <FadeIn>
+          <div className="mt-10 overflow-hidden rounded-2xl border border-border-strong bg-white">
+            <ul className="divide-y divide-border">
+              {areas.map((area) => (
+                <li
+                  key={area.id}
+                  className="flex flex-col gap-3 px-5 py-4 transition-colors hover:bg-primary-50/40 sm:flex-row sm:items-center sm:gap-6 sm:px-6"
+                >
+                  {/* The city never truncates — it is the thing being looked
+                      up. The region gives way instead if the row is tight. */}
+                  <div className="flex min-w-0 items-center gap-2.5 sm:w-[21rem] sm:shrink-0">
+                    <MapPin size={15} className="shrink-0 text-accent-600" aria-hidden="true" />
+                    <span className="whitespace-nowrap font-semibold text-fg">{area.city}</span>
+                    <span className="truncate text-sm text-muted">{area.region}</span>
+                  </div>
 
-              <div className="mt-5 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-                {group.cities.map((city) => (
-                  <Card key={city.id}>
-                    <div className="flex items-start justify-between gap-4">
-                      <h4 className="font-semibold text-fg">{city.city}</h4>
-                      <Antenna size={16} className="mt-1 shrink-0 text-muted" aria-hidden="true" />
-                    </div>
+                  <div className="flex min-w-0 flex-1 flex-wrap items-center gap-2">
+                    {parseFeatures(area.services).map((service) => (
+                      <Badge key={service}>{service}</Badge>
+                    ))}
+                  </div>
 
-                    <div className="mt-4 flex flex-wrap gap-2">
-                      {parseFeatures(city.services).map((service) => (
-                        <Badge key={service}>{service}</Badge>
-                      ))}
-                    </div>
-
-                    {city.note && <p className="mt-4 text-sm text-muted">{city.note}</p>}
-                  </Card>
-                ))}
-              </div>
-            </FadeIn>
-          ))}
-        </div>
+                  {area.note && (
+                    <p className="text-sm text-muted sm:w-64 sm:shrink-0 sm:text-right">
+                      {area.note}
+                    </p>
+                  )}
+                </li>
+              ))}
+            </ul>
+          </div>
+        </FadeIn>
 
         {/* TODO: replace with the confirmed coverage footprint from the network team. */}
         <p className="mt-12 text-sm text-muted">

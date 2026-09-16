@@ -586,6 +586,70 @@ function RichTextBlock({ section }: { section: SectionView }) {
   );
 }
 
+/**
+ * A row of terms to choose between — how long money is set aside for, or how
+ * long a plan runs. Deliberately not the pricing cards: there is nothing to buy
+ * here, the reader is picking a length, so each card leads with the duration
+ * rather than with a price, and the row is read across rather than down.
+ *
+ * `badge` on an item both prints a small ribbon and marks that card as the
+ * emphasised one in the row, so the option most people take stands out without
+ * a second field to keep in step.
+ */
+function TermsBlock({ section }: { section: SectionView }) {
+  const columns =
+    section.items.length === 4 ? "sm:grid-cols-2 lg:grid-cols-4" : "sm:grid-cols-2 lg:grid-cols-3";
+
+  return (
+    <Section id="terms" tone={section.tone}>
+      {section.title && (
+        <SectionTitle
+          eyebrow={section.eyebrow ?? undefined}
+          title={section.title}
+          description={section.body ?? undefined}
+        />
+      )}
+
+      <Stagger className={cx("grid gap-6", columns)}>
+        {section.items.map((item) => (
+          <StaggerItem key={item.title}>
+            <CardHover className="group h-full">
+              {/* The ribbon hangs over the card's top edge, so the card needs
+                  to be the positioning context and must not clip it. */}
+              <Card
+                emphasis={item.badge ? "feature" : "default"}
+                className="relative flex h-full flex-col text-center"
+              >
+                {item.badge && (
+                  <span className="absolute -top-3 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-full bg-accent-500 px-3 py-1 text-[0.7rem] font-bold uppercase tracking-wide text-primary-700">
+                    {item.badge}
+                  </span>
+                )}
+
+                <p className="text-display-xs font-semibold leading-none text-primary-600">
+                  {item.title}
+                </p>
+
+                {item.text && (
+                  <p className="mt-3 text-[0.95rem] leading-relaxed text-muted">{item.text}</p>
+                )}
+              </Card>
+            </CardHover>
+          </StaggerItem>
+        ))}
+      </Stagger>
+
+      {section.ctaLabel && section.ctaHref && (
+        <FadeIn className="mt-10 flex justify-center">
+          <Button href={section.ctaHref} variant="accent" size="lg">
+            {section.ctaLabel} <ArrowRight size={20} />
+          </Button>
+        </FadeIn>
+      )}
+    </Section>
+  );
+}
+
 /** Picks the component for a section's type. */
 export function SectionBlock({ section }: { section: SectionView }) {
   switch (section.type) {
@@ -605,6 +669,8 @@ export function SectionBlock({ section }: { section: SectionView }) {
       return <TimelineBlock section={section} />;
     case "checklist":
       return <ChecklistBlock section={section} />;
+    case "terms":
+      return <TermsBlock section={section} />;
     case "video":
       return <VideoBlock section={section} />;
     case "faq":

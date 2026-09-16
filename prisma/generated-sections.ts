@@ -604,8 +604,8 @@ export const generatedSections: SectionSeed[] = [
     image: "illus:savings",
     ctaLabel: "Get started",
     ctaHref: "/contact-us",
-    ctaLabel2: "See pricing",
-    ctaHref2: "#pricing",
+    ctaLabel2: "See the plans",
+    ctaHref2: "#terms",
     items: [
       { icon: "Zap", title: "Widest network coverage" },
       { icon: "ShieldCheck", title: "No hidden charges" },
@@ -639,6 +639,28 @@ export const generatedSections: SectionSeed[] = [
       { icon: "Zap", title: "No service fee", text: "The basic Keydso service is free, with no subscription and no hidden charges" },
     ],
   },
+  // TODO: the four lengths below are the ones the page offers to choose from,
+  // but the wording is written as a *goal*, not a lock — because "Why it helps"
+  // on this same page promises the balance can be withdrawn instantly. If
+  // Keydso really does hold money for the term, that card has to change too.
+  // Confirm with the eDahab team which of the two the product actually is.
+  {
+    pageKey: "Keydso",
+    type: "terms",
+    eyebrow: "Savings plans",
+    title: "How long are you saving for?",
+    body: "Pick a length when you open a Keydso balance and the menu shows you how far along you are each time you dial in. Your money is never locked — a plan is a target to aim at, not a door that closes, and you can move the balance back into eDahab whenever you need it.",
+    tone: "muted",
+    ctaLabel: "Start a plan",
+    ctaHref: "/contact-us",
+    items: [
+      { title: "1 month", text: "A short run to start with — enough to prove to yourself that the money stays put, without planning far ahead." },
+      { title: "3 months", text: "A season. Long enough to build toward a device or a business purchase, short enough to still see the end of it." },
+      { title: "6 months", badge: "Most chosen", text: "The length most customers pick. It covers a school term or a Ramadan fund, and it is where a small weekly amount starts to add up." },
+      { title: "12 months", text: "A full year set aside, for money you already know you will not need before then." },
+    ],
+  },
+
   {
     pageKey: "Keydso",
     type: "text-columns",

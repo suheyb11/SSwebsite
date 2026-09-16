@@ -23,6 +23,7 @@ export type SectionSeed = {
     value?: number;
     suffix?: string;
     prefix?: string;
+    badge?: string;
     href?: string;
   }[];
 };

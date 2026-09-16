@@ -10,12 +10,30 @@ import { Stagger, StaggerItem, HoverLift } from "@/components/motion";
  */
 export default function PricingCards({
   plans,
-  ctaHref = "/contact-us",
+  service,
+  ctaHref,
 }: {
   plans: PlanView[];
+  /**
+   * The product these plans belong to. Used to carry the choice into the
+   * top-up panel, the same way the bundle picker does.
+   */
+  service?: string;
+  /** Overrides the destination entirely, for a plan that is not self-served. */
   ctaHref?: string;
 }) {
   if (plans.length === 0) return null;
+
+  /**
+   * "Buy now" goes to the top-up page with the choice already made.
+   * It used to default to the contact form, which meant every plan on the home
+   * page and on every product page sent people to a form instead of to paying.
+   */
+  const hrefFor = (plan: PlanView) =>
+    ctaHref ??
+    "/top-up?" +
+      (service ? `service=${encodeURIComponent(service)}&` : "") +
+      `plan=${encodeURIComponent(plan.title)}&amount=${plan.price}#recharge`;
 
   return (
     <Stagger className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
@@ -57,7 +75,7 @@ export default function PricingCards({
 
               <div className="mt-8">
                 <Button
-                  href={ctaHref}
+                  href={hrefFor(plan)}
                   variant={plan.highlight ? "accent" : "outline"}
                   className="w-full"
                 >

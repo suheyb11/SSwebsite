@@ -95,7 +95,7 @@ export default async function ProductPage({ params }: Props) {
               description={
                 "Every plan runs on the same line, so you can move between them with a phone call."}
             />
-            <PricingCards plans={plans} />
+            <PricingCards plans={plans} service={slug} />
           </Section>
         )}
 
@@ -193,7 +193,7 @@ export default async function ProductPage({ params }: Props) {
       {plans.length > 0 && (
         <Section id="pricing" tone="muted">
           <SectionTitle eyebrow="Pricing" title="Check Our Valuable Price" />
-          <PricingCards plans={plans} />
+          <PricingCards plans={plans} service={slug} />
         </Section>
       )}
 

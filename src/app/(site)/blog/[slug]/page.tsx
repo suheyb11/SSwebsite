@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { ArrowLeft, ArrowRight, Clock, ListOrdered, MessageSquare } from "lucide-react";
 import { db } from "@/lib/db";
-import { formatDate, headingsOf, initialsOf, readingTime } from "@/lib/content";
+import { categoryHref, formatDate, headingsOf, initialsOf, readingTime } from "@/lib/content";
 import { Container, Section, cx } from "@/components/ui";
 import Markdown from "@/components/ui/Markdown";
 import { FadeIn } from "@/components/motion";
@@ -105,7 +105,7 @@ export default async function BlogDetailPage({ params }: Props) {
               {post.categories.map((cat) => (
                 <Link
                   key={cat.id}
-                  href={`/blog?category=${cat.slug}`}
+                  href={categoryHref(cat.slug)}
                   className="rounded-full bg-accent-500 px-3 py-1 text-xs font-bold uppercase tracking-wide text-primary-700 transition-opacity hover:opacity-85"
                 >
                   {cat.name}
@@ -192,7 +192,7 @@ export default async function BlogDetailPage({ params }: Props) {
                     {post.categories.map((cat) => (
                       <Link
                         key={cat.id}
-                        href={`/blog?category=${cat.slug}`}
+                        href={categoryHref(cat.slug)}
                         className="rounded-full border border-border px-3 py-1 text-sm font-medium text-muted transition-colors hover:border-accent-500 hover:bg-accent-500 hover:text-primary-700"
                       >
                         {cat.name}
