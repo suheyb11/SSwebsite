@@ -187,7 +187,14 @@ export function Button({
   const classes = cx(buttonBase, palette[variant], buttonSizes[size], className);
 
   if (href) {
-    if (external) {
+    // An absolute URL leaves the site, so it opens in a new tab and carries
+    // rel="noopener noreferrer" — without being told to. The section blocks pass
+    // hrefs straight from the database, where a link to the business portal or
+    // an app store is just a string, and nobody editing content should have to
+    // know about a second flag. An explicit `external` still wins.
+    const leavesTheSite = external ?? /^https?:\/\//i.test(href);
+
+    if (leavesTheSite) {
       return (
         <a
           href={href}

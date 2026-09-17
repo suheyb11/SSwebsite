@@ -373,6 +373,16 @@ function FeatureGridBlock({ section }: { section: SectionView }) {
           </StaggerItem>
         ))}
       </Stagger>
+
+      {/* Optional. A grid that describes somewhere the reader can go should be
+          able to send them there, rather than leaving them to find the way. */}
+      {section.ctaLabel && section.ctaHref && (
+        <FadeIn className="mt-10 flex justify-center">
+          <Button href={section.ctaHref} variant="accent" size="lg">
+            {section.ctaLabel} <ArrowRight size={20} />
+          </Button>
+        </FadeIn>
+      )}
     </Section>
   );
 }
