@@ -10,6 +10,7 @@ import { cx } from "@/components/ui";
 type Partner = {
   id: number;
   name: string;
+  /** Empty until the real logo file arrives — see WordMark below. */
   logoUrl: string;
 };
 
@@ -35,20 +36,46 @@ export default function PartnerStrip({ partners }: { partners: Partner[] }) {
     // prefers reduced motion.
     <Marquee className="py-2">
       <div className="flex items-center gap-14 pr-14 sm:gap-20 sm:pr-20">
-        {partners.map((partner) => (
-          <Image
-            key={partner.id}
-            src={partner.logoUrl}
-            alt={partner.name}
-            width={200}
-            height={80}
-            className={cx(
-              "w-auto shrink-0 object-contain",
-              SMALLER[partner.name] ? SMALLER_HEIGHT : DEFAULT_HEIGHT
-            )}
-          />
-        ))}
+        {partners.map((partner) =>
+          partner.logoUrl ? (
+            <Image
+              key={partner.id}
+              src={partner.logoUrl}
+              alt={partner.name}
+              width={200}
+              height={80}
+              className={cx(
+                "w-auto shrink-0 object-contain",
+                SMALLER[partner.name] ? SMALLER_HEIGHT : DEFAULT_HEIGHT
+              )}
+            />
+          ) : (
+            <WordMark key={partner.id} name={partner.name} />
+          )
+        )}
       </div>
     </Marquee>
+  );
+}
+
+/**
+ * A partner whose logo file has not arrived yet.
+ *
+ * Set as type rather than drawn as a mark. Inventing a logo for a real company
+ * would put a picture on the page that its owner never made and would not
+ * recognise; a name set in the site's own face claims nothing it should not.
+ * It sits at the same height as the logos so the row stays even, and swapping
+ * in the real file later is one `logoUrl` away — nothing else changes.
+ */
+function WordMark({ name }: { name: string }) {
+  return (
+    <span
+      className={cx(
+        "flex shrink-0 items-center whitespace-nowrap text-xl font-semibold tracking-tight text-primary-600 sm:text-2xl",
+        DEFAULT_HEIGHT
+      )}
+    >
+      {name}
+    </span>
   );
 }
