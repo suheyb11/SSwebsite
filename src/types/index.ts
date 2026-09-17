@@ -22,6 +22,23 @@ export type NavItem = {
   label: string;
   route: string;
   columns?: NavColumn[];
+  /**
+   * The card that closes a mega-menu, on the right of the columns.
+   *
+   * The columns are a list of places to go; this is the one worth going to.
+   * Optional — a menu without one simply gives its columns the extra width.
+   */
+  feature?: NavFeature;
+};
+
+export type NavFeature = {
+  eyebrow: string;
+  title: string;
+  text: string;
+  cta: string;
+  route: string;
+  /** A lucide-react icon name, resolved by src/lib/icons.ts. */
+  icon?: string;
 };
 
 export type NavColumn = {

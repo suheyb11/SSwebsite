@@ -9,6 +9,14 @@ export const navigation: NavItem[] = [
   {
     label: "Personal",
     route: "/bundles",
+    feature: {
+      eyebrow: "Shop",
+      title: "Geeye",
+      text: "Food, eHealth, travel and the Suuq marketplace — ordered and delivered in one place.",
+      cta: "Open Geeye",
+      route: "https://geeye.so",
+      icon: "Store",
+    },
     columns: [
       {
         title: "Voice",
@@ -52,6 +60,14 @@ export const navigation: NavItem[] = [
   {
     label: "Business",
     route: "/business",
+    feature: {
+      eyebrow: "Self-service",
+      title: "Business portal",
+      text: "Send bulk SMS, generate API keys and read your delivery reports, without waiting on anyone.",
+      cta: "Go to the portal",
+      route: "https://business.somtelsomalia.com/",
+      icon: "Send",
+    },
     columns: [
       {
         title: "Broadband",
@@ -89,6 +105,14 @@ export const navigation: NavItem[] = [
   {
     label: "Company",
     route: "/about",
+    feature: {
+      eyebrow: "Coming up",
+      title: "Somtel events",
+      text: "Launches, roadshows and community days across the Somali region. Free to attend.",
+      cta: "See what is on",
+      route: "/events",
+      icon: "CalendarCheck",
+    },
     columns: [
       {
         title: "About Somtel",

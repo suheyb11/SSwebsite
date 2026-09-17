@@ -5,10 +5,12 @@ import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { AnimatePresence, motion, useScroll, useSpring, useReducedMotion } from "framer-motion";
-import { ChevronDown, LockKeyhole, Menu, Phone } from "lucide-react";
+import { ArrowRight, ChevronDown, LockKeyhole, Menu, Phone } from "lucide-react";
 import { navigation, isExternal, routeHref } from "@/lib/navigation";
 import MobileMenu from "./MobileMenu";
 import { t } from "@/lib/copy";
+import { iconFor } from "@/lib/icons";
+import type { NavFeature } from "@/types";
 
 export default function Navbar({
   whatsapp,
@@ -41,6 +43,10 @@ export default function Navbar({
     setMobileOpen(false);
   }, [pathname]);
 
+  // The menu currently open, if any. The panel below the header renders from
+  // this rather than from inside the list item that opened it.
+  const openItem = navigation.find((item) => item.label === openMenu) ?? null;
+
   // True when the link points at the current page (or a section of it).
   // The path carries no language prefix, so the route compares directly.
   const isActive = (route: string) =>
@@ -49,6 +55,10 @@ export default function Navbar({
   return (
     <>
       <header
+        // Closing here rather than on <nav>: the panel is a child of the
+        // header, so the pointer travelling from a button down into the panel
+        // never leaves this element and the menu stays put.
+        onMouseLeave={() => setOpenMenu(null)}
         className={
           // Not sticky itself — the wrapper in the site layout pins the
           // offer strip and this header together. `relative` keeps the reading
@@ -83,7 +93,6 @@ export default function Navbar({
               everything deeper lives in a mega-menu column. */}
           <nav
             className="hidden lg:block"
-            onMouseLeave={() => setOpenMenu(null)}
             onKeyDown={(e) => {
               if (e.key === "Escape") setOpenMenu(null);
             }}
@@ -98,7 +107,9 @@ export default function Navbar({
                       <Link
                         href={routeHref(item.route)}
                         className={
-                          "relative block rounded-full px-5 py-2.5 text-[15px] font-medium transition-colors duration-200 " +
+                          // Tighter at lg, where five items plus the logo and the actions only
+                          // just fit; roomier again once there is width to spend.
+                          "relative block rounded-full px-3.5 py-2.5 text-[15px] font-medium transition-colors duration-200 xl:px-5 " +
                           (active
                             ? "text-fg"
                             : "text-muted hover:bg-primary-50/70 hover:text-fg")
@@ -127,7 +138,7 @@ export default function Navbar({
                       aria-expanded={open}
                       aria-haspopup="true"
                       className={
-                        "relative flex items-center gap-1.5 rounded-full px-5 py-2.5 text-[15px] font-medium transition-colors duration-200 " +
+                        "relative flex items-center gap-1.5 rounded-full px-3.5 py-2.5 text-[15px] font-medium transition-colors duration-200 xl:px-5 " +
                         (open || active
                           ? "text-fg"
                           : "text-muted hover:bg-primary-50/70 hover:text-fg")
@@ -144,51 +155,6 @@ export default function Navbar({
                       {active && <ActiveBar />}
                     </button>
 
-                    <AnimatePresence>
-                      {open && (
-                        <motion.div
-                          initial={{ opacity: 0, y: reduce ? 0 : 10, scale: reduce ? 1 : 0.98 }}
-                          animate={{ opacity: 1, y: 0, scale: 1 }}
-                          exit={{ opacity: 0, y: reduce ? 0 : 6, scale: reduce ? 1 : 0.99 }}
-                          transition={{ duration: reduce ? 0.12 : 0.24, ease: [0.22, 1, 0.36, 1] }}
-                          // The padding doubles as a hover bridge between the
-                          // button and the panel, so the menu does not flicker.
-                          className="absolute left-1/2 top-full w-max -translate-x-1/2 pt-4"
-                        >
-                          <motion.div
-                            className="flex gap-12 rounded-2xl border border-border bg-card/95 p-8 shadow-lift backdrop-blur-xl"
-                            variants={{
-                              hidden: {},
-                              show: {
-                                transition: { staggerChildren: reduce ? 0 : 0.04, delayChildren: 0.04 },
-                              },
-                            }}
-                            initial="hidden"
-                            animate="show"
-                          >
-                            {item.columns.map((column) => (
-                              <motion.div
-                                key={column.title}
-                                className="min-w-[11rem]"
-                                variants={{
-                                  hidden: { opacity: 0, y: reduce ? 0 : 8 },
-                                  show: { opacity: 1, y: 0, transition: { duration: 0.3 } },
-                                }}
-                              >
-                                <p className="eyebrow mb-4">{column.title}</p>
-                                <ul className="space-y-1">
-                                  {column.links.map((link) => (
-                                    <li key={link.label + link.route}>
-                                      <MegaLink href={routeHref(link.route)}>{link.label}</MegaLink>
-                                    </li>
-                                  ))}
-                                </ul>
-                              </motion.div>
-                            ))}
-                          </motion.div>
-                        </motion.div>
-                      )}
-                    </AnimatePresence>
                   </li>
                 );
               })}
@@ -198,7 +164,10 @@ export default function Navbar({
           <div className="flex shrink-0 items-center gap-2">
             <a
               href={`tel:${phone.replace(/[^+\d]/g, "")}`}
-              className="hidden items-center gap-2 rounded-full px-4 py-2.5 text-sm font-medium text-muted transition-colors duration-200 hover:text-fg xl:flex"
+              // Only once the row has room for it. At exactly the xl breakpoint the
+              // number appeared and pushed the header four pixels past the viewport,
+              // which is enough for a horizontal scrollbar on the whole page.
+              className="hidden items-center gap-2 rounded-full px-4 py-2.5 text-sm font-medium text-muted transition-colors duration-200 hover:text-fg 2xl:flex"
             >
               <Phone size={15} />
               {phone}
@@ -235,6 +204,85 @@ export default function Navbar({
             </button>
           </div>
         </div>
+
+        {/*
+          The mega-menu.
+
+          One panel for the whole header rather than one per menu item, and it
+          takes its width from the page container instead of from the button
+          that opened it. A panel anchored to its button has nowhere to go: the
+          menus on the right had no room left and ran off the edge of the
+          screen — Business by 35px and Company by 156px at 1400px wide, which
+          gave the whole page a sideways scrollbar. Anchored to the container,
+          the columns simply lay out inside a width that always fits.
+
+          It sits inside <header>, so moving the pointer from a button down
+          into the panel never leaves the header and the menu does not flicker.
+        */}
+        <AnimatePresence>
+          {openItem?.columns && (
+            <motion.div
+              initial={{ opacity: 0, y: reduce ? 0 : -8 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: reduce ? 0 : -6 }}
+              transition={{ duration: reduce ? 0.12 : 0.22, ease: [0.22, 1, 0.36, 1] }}
+              className="absolute inset-x-0 top-full z-50 hidden lg:block"
+            >
+              <div className="mx-auto w-full max-w-6xl px-5 pt-3 sm:px-8 lg:px-10">
+                <motion.div
+                  // One track per column, plus a fixed one for the feature card.
+                  // Spelled out rather than left to auto-fit, which counts tracks
+                  // by available width and had been making a sixth column, pushing
+                  // the card onto a second row.
+                  style={{
+                    gridTemplateColumns:
+                      `repeat(${openItem.columns.length}, minmax(0, 1fr))` +
+                      (openItem.feature ? " 17rem" : ""),
+                  }}
+                  className="grid gap-x-10 gap-y-8 rounded-2xl border border-border bg-card/95 p-8 shadow-lift backdrop-blur-xl"
+                  variants={{
+                    hidden: {},
+                    show: {
+                      transition: { staggerChildren: reduce ? 0 : 0.04, delayChildren: 0.03 },
+                    },
+                  }}
+                  initial="hidden"
+                  animate="show"
+                >
+                  {openItem.columns.map((column) => (
+                    <motion.div
+                      key={column.title}
+                      variants={{
+                        hidden: { opacity: 0, y: reduce ? 0 : 8 },
+                        show: { opacity: 1, y: 0, transition: { duration: 0.3 } },
+                      }}
+                    >
+                      <p className="eyebrow mb-4">{column.title}</p>
+                      <ul className="space-y-1">
+                        {column.links.map((link) => (
+                          <li key={link.label + link.route}>
+                            <MegaLink href={routeHref(link.route)}>{link.label}</MegaLink>
+                          </li>
+                        ))}
+                      </ul>
+                    </motion.div>
+                  ))}
+
+                  {openItem.feature && (
+                    <motion.div
+                      variants={{
+                        hidden: { opacity: 0, y: reduce ? 0 : 8 },
+                        show: { opacity: 1, y: 0, transition: { duration: 0.3 } },
+                      }}
+                    >
+                      <FeatureCard feature={openItem.feature} />
+                    </motion.div>
+                  )}
+                </motion.div>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
 
         {/* Reading-progress hairline. Scales on the GPU, so it is cheap to animate. */}
         <motion.div
@@ -279,6 +327,62 @@ function MegaLink({ href, children }: { href: string; children: React.ReactNode 
   return (
     <Link href={href} className={className}>
       {children}
+    </Link>
+  );
+}
+
+/**
+ * The card that closes a mega-menu.
+ *
+ * The columns beside it are a plain list of destinations — deliberately quiet,
+ * because a reader scanning them is looking for a name they already have in
+ * mind. This is the opposite: one place worth going even if you were not
+ * looking for it, so it gets the tint, the icon and the only arrow in the panel.
+ */
+function FeatureCard({ feature }: { feature: NavFeature }) {
+  const Icon = iconFor(feature.icon);
+  const external = isExternal(feature.route);
+
+  const body = (
+    <>
+      <span className="grid h-10 w-10 place-items-center rounded-xl bg-accent-500/20 text-primary-600">
+        <Icon size={19} aria-hidden="true" />
+      </span>
+
+      <span className="mt-4 block text-xs font-semibold uppercase tracking-[0.14em] text-muted">
+        {feature.eyebrow}
+      </span>
+
+      <span className="mt-1 block text-lg font-semibold text-fg">{feature.title}</span>
+
+      <span className="mt-2 block text-[0.925rem] leading-relaxed text-muted">{feature.text}</span>
+
+      <span className="mt-4 inline-flex items-center gap-1.5 text-sm font-semibold text-primary-600">
+        {feature.cta}
+        <ArrowRight
+          size={15}
+          aria-hidden="true"
+          className="transition-transform duration-200 group-hover:translate-x-1"
+        />
+      </span>
+    </>
+  );
+
+  const className =
+    "group flex h-full flex-col rounded-xl border border-border-strong bg-primary-50/50 p-5 " +
+    "transition-[border-color,background-color] duration-200 hover:border-primary-400 hover:bg-primary-50";
+
+  if (external) {
+    return (
+      <a href={feature.route} target="_blank" rel="noopener noreferrer" className={className}>
+        {body}
+      </a>
+    );
+  }
+
+  return (
+    <Link href={routeHref(feature.route)} className={className}>
+      {body}
     </Link>
   );
 }
