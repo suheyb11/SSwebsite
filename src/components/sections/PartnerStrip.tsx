@@ -15,18 +15,16 @@ type Partner = {
 };
 
 /**
- * Most of these logos are wide wordmarks, so one height suits them all. A few
- * are round or square marks, which look far heavier than a wordmark at the same
- * height — those get their own smaller size so the row stays visually even.
+ * Every logo occupies the same box.
  *
- * Add a partner name here if its logo ever looks oversized in the strip.
+ * There used to be a per-name list of exceptions here, because rendering each
+ * file at a fixed height with the width left to follow suits a wide wordmark
+ * and leaves a round mark looking half the size beside it. The files are now
+ * all centred on one 400x200 canvas by scripts/normalise-partner-logos.mjs, so
+ * a single size covers every one of them and there is nothing to keep in step
+ * by hand — a new partner needs no entry anywhere.
  */
-const SMALLER: Record<string, true> = {
-  Bluesky: true,
-};
-
-const DEFAULT_HEIGHT = "h-16 sm:h-20";
-const SMALLER_HEIGHT = "h-12 sm:h-14";
+const LOGO_BOX = "h-16 w-32 sm:h-20 sm:w-40";
 
 export default function PartnerStrip({ partners }: { partners: Partner[] }) {
   if (partners.length === 0) return null;
@@ -42,12 +40,9 @@ export default function PartnerStrip({ partners }: { partners: Partner[] }) {
               key={partner.id}
               src={partner.logoUrl}
               alt={partner.name}
-              width={200}
-              height={80}
-              className={cx(
-                "w-auto shrink-0 object-contain",
-                SMALLER[partner.name] ? SMALLER_HEIGHT : DEFAULT_HEIGHT
-              )}
+              width={400}
+              height={200}
+              className={cx("shrink-0 object-contain", LOGO_BOX)}
             />
           ) : (
             <WordMark key={partner.id} name={partner.name} />
@@ -71,8 +66,8 @@ function WordMark({ name }: { name: string }) {
   return (
     <span
       className={cx(
-        "flex shrink-0 items-center whitespace-nowrap text-xl font-semibold tracking-tight text-primary-600 sm:text-2xl",
-        DEFAULT_HEIGHT
+        "flex shrink-0 items-center justify-center whitespace-nowrap text-center text-lg font-semibold tracking-tight text-primary-600 sm:text-xl",
+        LOGO_BOX
       )}
     >
       {name}
